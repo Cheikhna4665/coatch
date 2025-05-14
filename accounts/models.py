@@ -71,9 +71,13 @@ class Utilisateur(AbstractBaseUser):
         return f"{self.prenom} {self.nom} ({self.get_role_display()})"
 
     class Meta:
-        verbose_name = "Administrateur Global"
-        verbose_name_plural = "Administrateurs Globaux"
-
+        verbose_name = "Utilisateur Global"
+        verbose_name_plural = "Utilisateurs Globaux"
+    def has_perm(self, perm, obj=None):
+        return self.is_superuser
+    
+    def has_module_perms(self, app_label):
+        return self.is_superuser
 
 class AdminGlobal(models.Model):
     user_id = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='Admin_global_profile')
