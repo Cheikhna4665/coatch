@@ -81,7 +81,7 @@ class Utilisateur(AbstractBaseUser):
 
 class AdminGlobal(models.Model):
     user_id = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='Admin_global_profile')
-    competences = models.TextField(blank=True)
+
     def __str__(self):
         return f"AdminGlobal {self.user_id}"
     
