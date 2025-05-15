@@ -45,7 +45,8 @@ class Utilisateur(AbstractBaseUser):
     # Timestamps
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
-    
+    otp_created_at = models.DateTimeField(blank=True, null=True)
+
     # Additional Info
 
     is_superuser = models.BooleanField(default=False)

@@ -30,7 +30,7 @@ admin.site.register(Utilisateur, CustomUserAdmin)
 
 @admin.register(AdminGlobal)
 class AdminGlobalAdmin(admin.ModelAdmin):
-    list_display = ('user_id', 'competences')
+    list_display = ('user_id',)
     raw_id_fields = ('user_id',)  # Better for performance with OneToOne relationships
 
 @admin.register(Coach)
