@@ -6,8 +6,8 @@ from .models import AdminGlobal, Coach, AdminEntreprise, Employer
 
 @admin.register(AdminGlobal)
 class AdminGlobalAdmin(admin.ModelAdmin):
-    list_display = ('id', 'dateCreation')
-    search_fields = ('id',)
+    list_display = ('user_id',)
+    raw_id_fields = ('user_id',)  
 
 @admin.register(Coach)
 class CoachAdmin(admin.ModelAdmin):
