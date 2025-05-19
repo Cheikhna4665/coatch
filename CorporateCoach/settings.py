@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
 
     #app
     'accounts',
@@ -127,6 +128,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 STATIC_URL = 'static/'
 
+AUTH_USER_MODEL = 'accounts.Utilisateur'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 import os
 
