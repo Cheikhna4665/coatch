@@ -67,7 +67,24 @@ class Utilisateur(AbstractBaseUser):
     REQUIRED_FIELDS = ['nom', 'prenom', 'role']
 
     objects = UtilisateurManager()
-
+    
+    def save(self, *args, **kwargs):
+        created = not self.pk  # Check if this is a new user being created
+        super().save(*args, **kwargs)  # Save the user first
+        
+        if created:  # Only create profile for new users
+            self.create_related_profile()
+    
+    def create_related_profile(self):
+        """Create the appropriate profile based on the user's role"""
+        if self.role == 'admin_global' and not hasattr(self, 'Admin_global_profile'):
+            AdminGlobal.objects.create(user_id=self)
+        elif self.role == 'admin_entreprise' and not hasattr(self, 'admin_entreprise_profile'):
+            AdminEntreprise.objects.create(user_id=self)
+        elif self.role == 'coach' and not hasattr(self, 'coach_profile'):
+            Coach.objects.create(user_id=self, certification="", experience="")
+        elif self.role == 'employe' and not hasattr(self, 'employe_profile'):
+            Employer.objects.create(user_id=self, poste="", date_embauche="2000-01-01", date_naissance="2000-01-01")
     def __str__(self):
         return f"{self.prenom} {self.nom} ({self.get_role_display()})"
 
@@ -79,24 +96,52 @@ class Utilisateur(AbstractBaseUser):
     
     def has_module_perms(self, app_label):
         return self.is_superuser
-
+    @property
+    def profile(self):
+        """Returns the specific profile based on the user's role"""
+        if hasattr(self, 'Admin_global_profile'):
+            return self.Admin_global_profile
+        elif hasattr(self, 'admin_entreprise_profile'):
+            return self.admin_entreprise_profile
+        elif hasattr(self, 'coach_profile'):
+            return self.coach_profile
+        elif hasattr(self, 'employe_profile'):
+            return self.employe_profile
+        return None
+    
 class AdminGlobal(models.Model):
-    user_id = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='Admin_global_profile')
+    user_id = models.OneToOneField(
+        Utilisateur,
+        on_delete=models.CASCADE,
+        related_name='Admin_global_profile',
+        limit_choices_to={'role': 'admin_global'}
+)
 
     def __str__(self):
         return f"AdminGlobal {self.user_id}"
     
 class Coach(models.Model):
-    user_id = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='coach_profile')
+    user_id = models.OneToOneField(
+        Utilisateur,
+        on_delete=models.CASCADE, 
+        related_name='coach_profile',
+        limit_choices_to={'role': 'coach'}
+)
     certification = models.TextField()
     experience = models.TextField()
     specialites = models.TextField(blank=True)
+
 
     def __str__(self):
         return f"Coach {self.user_id}"
 
 class AdminEntreprise(models.Model):
-    user_id = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='admin_entreprise_profile')
+    user_id = models.OneToOneField(
+            Utilisateur, 
+            on_delete=models.CASCADE,
+            related_name='admin_entreprise_profile',
+            limit_choices_to={'role': 'admin_entreprise'}
+)
     poste = models.CharField(max_length=100)
     telephone = models.CharField(max_length=20)
     date_embauche = models.DateField()
@@ -106,11 +151,22 @@ class AdminEntreprise(models.Model):
         return f"Admin {self.user_id} - {self.entreprise}"
 
 class Employer(models.Model):
-    user_id = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='employe_profile')
+    user_id = models.OneToOneField(
+        Utilisateur, 
+        on_delete=models.CASCADE, 
+        related_name='employe_profile',
+        limit_choices_to={'role': 'employe'}
+)
     date_embauche = models.DateField()
     date_naissance = models.DateField()
     poste = models.CharField(max_length=100)
     entreprise = models.ForeignKey(Entreprise, on_delete=models.SET_NULL, null=True, related_name='employes')
-
+    coach = models.ForeignKey(
+        Coach,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='employers'
+    )
     def __str__(self):
         return f"Employé {self.user_id} - {self.poste}"                                                 
