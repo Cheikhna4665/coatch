@@ -7,4 +7,5 @@ from .serializers import ProgrammeSportifSerializer
 
 class ProgrammeSportifViewSet(viewsets.ModelViewSet):
     queryset = ProgrammeSportif.objects.all()
+    
     serializer_class = ProgrammeSportifSerializer
