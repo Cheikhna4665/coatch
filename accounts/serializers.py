@@ -1,6 +1,24 @@
 
 from rest_framework import serializers
 from .models import AdminGlobal, Coach, AdminEntreprise, Employer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims to BOTH tokens
+        token['username'] = user.nom
+        token['email'] = user.email
+        token['Role'] = user.role
+        
+        # Add same claims to access token
+        token.access_token['username'] = user.nom
+        token.access_token['email'] = user.email
+        token.access_token['Role'] = user.role
+        
+        return token
 
 class AdminGlobalSerializer(serializers.ModelSerializer):
     class Meta:
